@@ -1,0 +1,27 @@
+---
+title: "Where is the Elk?"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(leaflet)
+library(knitr)
+```
+
+
+```{r data}
+corners <- data.frame(lng = c(11.04650, 11.04323, 10.99286), 
+                      lat = c(61.86748, 61.86216, 61.86216))
+```
+
+
+```{r corners}
+corners %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(stroke = F,
+                   fillOpacity = 0.6,
+                   radius = 4)
+```
+
