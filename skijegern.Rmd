@@ -1,0 +1,38 @@
+---
+title: "Skijegern"
+output: html_notebook
+---
+
+Skijegerpostene på kart.
+
+```{r setup}
+library(tidyverse)
+library(googlesheets4)
+library(googledrive)
+library(rgdal)
+
+googlesheets4::sheets_auth(scope = "https://www.googleapis.com/auth/drive")
+googledrive::drive_auth(token = sheets_token())
+```
+
+```{r coordinates}
+turo <- googledrive::drive_get("Turorientering")
+poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
+
+# TODO: understand æøå!
+
+skijegerposter <- poster %>% 
+  dplyr::filter(Opplegg == "Skijegern") %>% 
+  dplyr::filter(!is.na(Lat))
+```
+
+```{r gpx_file}
+# rgdal::writeOGR
+```
+
+
+```{r map}
+
+```
+
+
