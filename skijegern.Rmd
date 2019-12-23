@@ -3,13 +3,18 @@ title: "Skijegern"
 output: html_notebook
 ---
 
-Skijegerpostene på kart.
-
 ```{r setup}
 library(tidyverse)
 library(googlesheets4)
 library(googledrive)
 library(rgdal)
+library(leaflet)
+
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE,
+                      cache = TRUE)
 
 googlesheets4::sheets_auth(scope = "https://www.googleapis.com/auth/drive")
 googledrive::drive_auth(token = sheets_token())
@@ -20,19 +25,47 @@ turo <- googledrive::drive_get("Turorientering")
 poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
 
 # TODO: understand æøå!
+# Need devtools::install_github("r-lib/gargle"), but have no rights...
+# Await new release of gargle on CRAN
 
 skijegerposter <- poster %>% 
   dplyr::filter(Opplegg == "Skijegern") %>% 
-  dplyr::filter(!is.na(Lat))
+  dplyr::filter(!is.na(lat))
 ```
 
 ```{r gpx_file}
 # rgdal::writeOGR
+
+poster_til_gpx <- skijegerposter %>% 
+  dplyr::filter(Ar == 2020) %>% 
+  dplyr::mutate(name = paste(Postnr, Opplegg, Ar, sep = " "),
+                lat = as.numeric(lat),
+                lon = as.numeric(lon)) %>% 
+  dplyr::rename(desc = Beskrivelse) %>% 
+  dplyr::select(name, desc, lat, lon)
+
+data_til_gpx <- sp::SpatialPointsDataFrame(
+  coords = poster_til_gpx[,c(4, 3)],
+  data = poster_til_gpx,
+  proj4string = CRS("+proj=longlat + ellps=WGS84"))
+
+rgdal::writeOGR(data_til_gpx, 
+                dsn = "poster.gpx",
+                dataset_options = "GPX_USE_EXTENSIONS=yes",
+                layer = "waypoints",
+                driver = "GPX",
+                overwrite_layer = TRUE)
+
 ```
 
 
 ```{r map}
-
+poster_til_gpx %>% 
+  leaflet::leaflet(width = "100%") %>% 
+  leaflet::addTiles() %>% 
+  leaflet::addCircleMarkers(radius = 8, weight = 3, fill = TRUE, 
+                            opacity = 0.8, fillOpacity = 0.1,
+                            label = ~paste(name, "\n", desc))
 ```
 
 
