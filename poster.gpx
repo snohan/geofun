@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="GDAL 2.2.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ogr="http://osgeo.org/gdal" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<metadata><bounds minlat="63.362409999999997" minlon="10.196730000000001" maxlat="63.446489999999997" maxlon="10.734909999999999"/></metadata>                  
+<wpt lat="63.39378" lon="10.31313">
+  <name>1 Skijegern 2020</name>
+  <desc>NV kolle</desc>
+  <extensions>
+    <ogr:lat>63.39378</ogr:lat>
+    <ogr:lon>10.31313</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.39741" lon="10.27634">
+  <name>2 Skijegern 2020</name>
+  <desc>Myr, SV i, mellom koller</desc>
+  <extensions>
+    <ogr:lat>63.39741</ogr:lat>
+    <ogr:lon>10.27634</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.39713" lon="10.2564">
+  <name>3 Skijegern 2020</name>
+  <desc>SÃ¸kk</desc>
+  <extensions>
+    <ogr:lat>63.39713</ogr:lat>
+    <ogr:lon>10.2564</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.38347" lon="10.28297">
+  <name>4 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.38347</ogr:lat>
+    <ogr:lon>10.28297</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37252" lon="10.2767">
+  <name>5 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.37252</ogr:lat>
+    <ogr:lon>10.2767</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.3661" lon="10.32884">
+  <name>6 Skijegern 2020</name>
+  <desc>Liten kolle</desc>
+  <extensions>
+    <ogr:lat>63.3661</ogr:lat>
+    <ogr:lon>10.32884</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.41065" lon="10.31836">
+  <name>7 Skijegern 2020</name>
+  <desc>V kolle</desc>
+  <extensions>
+    <ogr:lat>63.41065</ogr:lat>
+    <ogr:lon>10.31836</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.41681" lon="10.29974">
+  <name>8 Skijegern 2020</name>
+  <desc>Myr, V i</desc>
+  <extensions>
+    <ogr:lat>63.41681</ogr:lat>
+    <ogr:lon>10.29974</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.41309" lon="10.26361">
+  <name>9 Skijegern 2020</name>
+  <desc>Ã˜ kolle</desc>
+  <extensions>
+    <ogr:lat>63.41309</ogr:lat>
+    <ogr:lon>10.26361</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.40752" lon="10.25371">
+  <name>10 Skijegern 2020</name>
+  <desc>Liten kolle</desc>
+  <extensions>
+    <ogr:lat>63.40752</ogr:lat>
+    <ogr:lon>10.25371</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.42803" lon="10.32787">
+  <name>11 Skijegern 2020</name>
+  <desc>Myr, S i</desc>
+  <extensions>
+    <ogr:lat>63.42803</ogr:lat>
+    <ogr:lon>10.32787</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.43723" lon="10.32609">
+  <name>12 Skijegern 2020</name>
+  <desc>V kolle, Ã¸st pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.43723</ogr:lat>
+    <ogr:lon>10.32609</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.44649" lon="10.29365">
+  <name>13 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.44649</ogr:lat>
+    <ogr:lon>10.29365</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.43128" lon="10.25166">
+  <name>14 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.43128</ogr:lat>
+    <ogr:lon>10.25166</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.44074" lon="10.26596">
+  <name>15 Skijegern 2020</name>
+  <desc>Liten myr</desc>
+  <extensions>
+    <ogr:lat>63.44074</ogr:lat>
+    <ogr:lon>10.26596</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.44212" lon="10.2387">
+  <name>16 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.44212</ogr:lat>
+    <ogr:lon>10.2387</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.4348" lon="10.23256">
+  <name>17 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.4348</ogr:lat>
+    <ogr:lon>10.23256</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.42681" lon="10.21166">
+  <name>18 Skijegern 2020</name>
+  <desc>Myr, Ã˜ i</desc>
+  <extensions>
+    <ogr:lat>63.42681</ogr:lat>
+    <ogr:lon>10.21166</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.42812" lon="10.2784">
+  <name>19 Skijegern 2020</name>
+  <desc>Myr, NV i</desc>
+  <extensions>
+    <ogr:lat>63.42812</ogr:lat>
+    <ogr:lon>10.2784</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.41442" lon="10.22444">
+  <name>20 Skijegern 2020</name>
+  <desc>Kolle, NV pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.41442</ogr:lat>
+    <ogr:lon>10.22444</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.41081" lon="10.19673">
+  <name>21 Skijegern 2020</name>
+  <desc>SÃ˜ kolle, NV fot</desc>
+  <extensions>
+    <ogr:lat>63.41081</ogr:lat>
+    <ogr:lon>10.19673</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.40691" lon="10.21093">
+  <name>22 Skijegern 2020</name>
+  <desc>Liten kolle, S fot</desc>
+  <extensions>
+    <ogr:lat>63.40691</ogr:lat>
+    <ogr:lon>10.21093</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.3975" lon="10.20761">
+  <name>23 Skijegern 2020</name>
+  <desc>S kolle</desc>
+  <extensions>
+    <ogr:lat>63.3975</ogr:lat>
+    <ogr:lon>10.20761</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.3893" lon="10.20445">
+  <name>24 Skijegern 2020</name>
+  <desc>Liten kolle, Ã˜ pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.3893</ogr:lat>
+    <ogr:lon>10.20445</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.39392" lon="10.23032">
+  <name>25 Skijegern 2020</name>
+  <desc>Liten kolle</desc>
+  <extensions>
+    <ogr:lat>63.39392</ogr:lat>
+    <ogr:lon>10.23032</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.38409" lon="10.20279">
+  <name>26 Skijegern 2020</name>
+  <desc>Nese</desc>
+  <extensions>
+    <ogr:lat>63.38409</ogr:lat>
+    <ogr:lon>10.20279</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.38769" lon="10.21973">
+  <name>27 Skijegern 2020</name>
+  <desc>Kolle, SV pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.38769</ogr:lat>
+    <ogr:lon>10.21973</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.36241" lon="10.23349">
+  <name>28 Skijegern 2020</name>
+  <desc>Liten kolle, NÃ˜ pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.36241</ogr:lat>
+    <ogr:lon>10.23349</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37134" lon="10.2321">
+  <name>29 Skijegern 2020</name>
+  <desc>Myr, N i</desc>
+  <extensions>
+    <ogr:lat>63.37134</ogr:lat>
+    <ogr:lon>10.2321</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37575" lon="10.2493">
+  <name>30 Skijegern 2020</name>
+  <desc>Myr, SÃ˜ i</desc>
+  <extensions>
+    <ogr:lat>63.37575</ogr:lat>
+    <ogr:lon>10.2493</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37632" lon="10.20522">
+  <name>31 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.37632</ogr:lat>
+    <ogr:lon>10.20522</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.36742" lon="10.20342">
+  <name>32 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.36742</ogr:lat>
+    <ogr:lon>10.20342</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.39235" lon="10.48454">
+  <name>33 Skijegern 2020</name>
+  <desc>HÃ¸ydepunkt vest for jordkjeller</desc>
+  <extensions>
+    <ogr:lat>63.39235</ogr:lat>
+    <ogr:lon>10.48454</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.38108" lon="10.47798">
+  <name>34 Skijegern 2020</name>
+  <desc>Flat nese, NÃ˜ pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.38108</ogr:lat>
+    <ogr:lon>10.47798</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37221" lon="10.47684">
+  <name>35 Skijegern 2020</name>
+  <desc>Kolle, NÃ˜ pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.37221</ogr:lat>
+    <ogr:lon>10.47684</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37366" lon="10.49612">
+  <name>36 Skijegern 2020</name>
+  <desc>Kolle, S pÃ¥</desc>
+  <extensions>
+    <ogr:lat>63.37366</ogr:lat>
+    <ogr:lon>10.49612</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.39833" lon="10.72873">
+  <name>37 Skijegern 2020</name>
+  <desc>Nese</desc>
+  <extensions>
+    <ogr:lat>63.39833</ogr:lat>
+    <ogr:lon>10.72873</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.37315" lon="10.68702">
+  <name>38 Skijegern 2020</name>
+  <desc>Liten kolle</desc>
+  <extensions>
+    <ogr:lat>63.37315</ogr:lat>
+    <ogr:lon>10.68702</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.3642" lon="10.70333">
+  <name>39 Skijegern 2020</name>
+  <desc>Kolle</desc>
+  <extensions>
+    <ogr:lat>63.3642</ogr:lat>
+    <ogr:lon>10.70333</ogr:lon>
+  </extensions>
+</wpt>
+<wpt lat="63.38008" lon="10.73491">
+  <name>40 Skijegern 2020</name>
+  <desc>Stein</desc>
+  <extensions>
+    <ogr:lat>63.38008</ogr:lat>
+    <ogr:lon>10.73491</ogr:lon>
+  </extensions>
+</wpt>
+</gpx>
