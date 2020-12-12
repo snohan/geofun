@@ -3,10 +3,10 @@ title: "Skijegern"
 output: html_notebook
 ---
 
-```{r setup}
+```{r setup, include=FALSE, message=FALSE}
 library(tidyverse)
 library(googlesheets4)
-library(googledrive)
+library(googledrive)1
 library(rgdal)
 library(leaflet)
 
@@ -20,7 +20,7 @@ googlesheets4::sheets_auth(scope = "https://www.googleapis.com/auth/drive")
 googledrive::drive_auth(token = sheets_token())
 ```
 
-```{r coordinates}
+```{r coordinates, include=FALSE}
 turo <- googledrive::drive_get("Turorientering")
 poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
 
@@ -33,12 +33,13 @@ skijegerposter <- poster %>%
   dplyr::filter(!is.na(lat))
 ```
 
-```{r gpx_file}
+```{r gpx_file, include=FALSE}
 # rgdal::writeOGR
 
 poster_til_gpx <- skijegerposter %>% 
-  dplyr::filter(Ar == 2020) %>% 
-  dplyr::mutate(name = paste(Postnr, Opplegg, Ar, sep = " "),
+  dplyr::filter(Ar == 2021) %>% 
+  dplyr::mutate(#name = paste(Postnr, Opplegg, Ar, sep = " "),
+                name = as.character(Postnr),
                 lat = as.numeric(lat),
                 lon = as.numeric(lon)) %>% 
   dplyr::rename(desc = Beskrivelse) %>% 
