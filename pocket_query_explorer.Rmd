@@ -1,0 +1,54 @@
+---
+title: "Explore Pocket Queries"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sf)
+library(lwgeom)
+library(leaflet)
+
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE,
+                      cache = TRUE)
+```
+
+```{r read_data}
+pocket_query <- "to_find_trd.gpx"
+
+# To calculate distance from 
+# 1. home location N 63° 23.567′ E 10° 25.026′
+my_pois <- tibble::tibble(place_name = c("home"),
+                          lon = c(10.41710),
+                          lat = c(63.39278)) %>% 
+  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326)
+
+#pq_layers <- sf::st_layers(pocket_query)
+pq_data <- sf::st_read(pocket_query, layer = "waypoints") %>% 
+  dplyr::select(gc_code = name, title = urlname, desc, placed_on = time, type) %>% 
+  tidyr::separate(desc, c("name_dup", "rest"), sep = "by ") %>% 
+  tidyr::separate(rest, c("co", "dt"), sep = "\\(") %>% 
+  tidyr::separate(dt, c("difficulty", "terrain"), sep = "/") %>%
+  dplyr::mutate(co = stringr::str_replace(co, ", Traditional Cache", ""),
+                co = stringr::str_replace(co, ", Virtual Cache", ""),
+                co = stringr::str_replace(co, ", Earthcache", ""),
+                difficulty = as.numeric(difficulty),
+                terrain = as.numeric(stringr::str_sub(terrain, 1, -2)),
+                placed_on = lubridate::as_date(placed_on),
+                month = lubridate::month(placed_on),
+                day = lubridate::mday(placed_on),
+                type = stringr::str_sub(type, 10, -1),
+                distance_from_home = sf::st_distance(geometry, my_pois$geometry[1]) %>% 
+                  round()) %>% 
+  dplyr::select(type, gc_code, title, co, difficulty, terrain, placed_on, month, day, 
+                distance_from_home)
+
+
+
+gc_placed_in_april <- pq_data %>% 
+  dplyr::filter(month == 4)
+```
+
