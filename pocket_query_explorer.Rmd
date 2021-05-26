@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 ```{r read_data}
-pocket_query <- "to_find_trd.gpx"
+pocket_query <- "gclists/trd.gpx"
 
 # To calculate distance from 
 # 1. home location N 63° 23.567′ E 10° 25.026′
