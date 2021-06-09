@@ -59,7 +59,6 @@ read_pq_data <- function(pq_gpx_file) {
 
 
 ```{r read}
-
 #pq_data <- read_pq_data("gclists/to_find_trd.gpx")
   
 trondheim_kommune <- read_pq_data("gclists/trd_kommune.gpx") %>% 
