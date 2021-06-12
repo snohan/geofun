@@ -5,3 +5,4 @@
 *.gpx
 *.txt
 *.zip
+*_cache/*

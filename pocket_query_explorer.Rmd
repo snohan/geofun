@@ -1,6 +1,8 @@
 ---
 title: "Gjenstående funn"
-output: html_notebook
+knit: (function(input_file, encoding){
+  rmarkdown::render(input_file, encoding=encoding, output_file = 'docs/index.html')})
+output: html_document
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -67,21 +69,26 @@ trondheim_kommune <- read_pq_data("gclists/trd_kommune.gpx") %>%
 rendalen_kommune <- read_pq_data("gclists/rendalen_kommune.gpx") %>% 
   dplyr::mutate(Kommune = "Rendalen")
 
+hamar_kommune <- read_pq_data("gclists/hamar_kommune.gpx") %>% 
+  dplyr::mutate(Kommune = "Hamar")
+
 missing_finds_per_year <- 
   dplyr::bind_rows(
     trondheim_kommune,
-    rendalen_kommune
+    rendalen_kommune,
+    hamar_kommune
   ) %>% 
   sf::st_drop_geometry() %>% 
   dplyr::group_by(year, Kommune) %>% 
   dplyr::summarise(antall = n(), .groups = "drop") %>% 
-  tidyr::complete(year = 2001:2021, nesting(Kommune), fill = list(antall = 0)) %>% 
+  tidyr::complete(year = 2001:2020, nesting(Kommune), fill = list(antall = 0)) %>% 
   tidyr::pivot_wider(names_from = Kommune, values_from = antall)
   
 missing_finds_total <- 
   dplyr::bind_rows(
     trondheim_kommune,
-    rendalen_kommune
+    rendalen_kommune,
+    hamar_kommune
   ) %>% 
   sf::st_drop_geometry() %>% 
   dplyr::group_by(Kommune) %>% 
@@ -98,8 +105,9 @@ missing_finds_per_year %>%
   set_header_labels(year = "Utleggsår") %>% 
   theme_booktabs(bold_header = TRUE) %>% 
   bg(bg = "#c0c0c0", part = "header") %>% 
-  bg(i = ~ Rendalen == 0, j = 2, bg = "#099900", part = "body") %>% 
-  bg(i = ~ Trondheim == 0, j = 3, bg = "#099900", part = "body")
+  bg(i = ~ Hamar == 0, j = 2, bg = "#099900", part = "body") %>% 
+  bg(i = ~ Rendalen == 0, j = 3, bg = "#099900", part = "body") %>% 
+  bg(i = ~ Trondheim == 0, j = 4, bg = "#099900", part = "body")
 ```
 
 
