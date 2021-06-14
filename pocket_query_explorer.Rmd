@@ -19,6 +19,8 @@ knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       error = FALSE,
                       cache = TRUE)
+
+# TODO: make a prep script
 ```
 
 ```{r functions}
@@ -72,33 +74,38 @@ rendalen_kommune <- read_pq_data("gclists/rendalen_kommune.gpx") %>%
 hamar_kommune <- read_pq_data("gclists/hamar_kommune.gpx") %>% 
   dplyr::mutate(Kommune = "Hamar")
 
-missing_finds_per_year <- 
+missing_finds <- 
   dplyr::bind_rows(
     trondheim_kommune,
     rendalen_kommune,
     hamar_kommune
   ) %>% 
-  sf::st_drop_geometry() %>% 
+  sf::st_drop_geometry()
+
+missing_finds_per_year <- missing_finds %>% 
   dplyr::group_by(year, Kommune) %>% 
   dplyr::summarise(antall = n(), .groups = "drop") %>% 
   tidyr::complete(year = 2001:2020, nesting(Kommune), fill = list(antall = 0)) %>% 
   tidyr::pivot_wider(names_from = Kommune, values_from = antall)
   
-missing_finds_total <- 
-  dplyr::bind_rows(
-    trondheim_kommune,
-    rendalen_kommune,
-    hamar_kommune
-  ) %>% 
-  sf::st_drop_geometry() %>% 
+missing_finds_total <- missing_finds %>% 
   dplyr::group_by(Kommune) %>% 
   dplyr::summarise(antall = n(), .groups = "drop") %>% 
   tidyr::pivot_wider(names_from = Kommune, values_from = antall)
+
+missing_finds_total_per_type <- missing_finds %>% 
+  dplyr::group_by(Kommune, type) %>% 
+  dplyr::summarise(antall = n(), .groups = "drop") %>% 
+  tidyr::pivot_wider(names_from = Kommune, values_from = antall) %>% 
+  dplyr::arrange(type) %>% 
+  dplyr::rename(Type = type)
+
+# TODO: ratio of solved mysteries
 ```
 
 Antall manglende cachefunn per utleggsår.
 
-```{r trd_table_per_year}
+```{r table_per_year}
 missing_finds_per_year %>% 
   flextable::flextable() %>% 
   colformat_double(j = 1, big.mark = "", digits = 0) %>% 
@@ -108,13 +115,24 @@ missing_finds_per_year %>%
   bg(i = ~ Hamar == 0, j = 2, bg = "#099900", part = "body") %>% 
   bg(i = ~ Rendalen == 0, j = 3, bg = "#099900", part = "body") %>% 
   bg(i = ~ Trondheim == 0, j = 4, bg = "#099900", part = "body")
+
+# TODO: color year if all are 0
 ```
 
 
-```{r trd_table_total}
+```{r table_total}
 missing_finds_total %>% 
   flextable::flextable() %>% 
   theme_booktabs(bold_header = TRUE) %>% 
   bg(bg = "#c0c0c0", part = "header")
+```
+
+```{r table_total_type}
+missing_finds_total_per_type %>% 
+  flextable::flextable() %>% 
+  theme_booktabs(bold_header = TRUE) %>% 
+  bg(bg = "#c0c0c0", part = "header") %>% 
+  set_table_properties(width = .47, 
+                       layout = "autofit")
 ```
 
