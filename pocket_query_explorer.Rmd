@@ -1,5 +1,5 @@
 ---
-title: "Gjenstående funn"
+title: "Gjenstående cacher"
 knit: (function(input_file, encoding){
   rmarkdown::render(input_file, encoding=encoding, output_file = 'docs/index.html')})
 output: html_document
@@ -101,9 +101,25 @@ missing_finds_total_per_type <- missing_finds %>%
   dplyr::rename(Type = type)
 
 # TODO: ratio of solved mysteries
+all_ready <- read_pq_data("gclists/all_ready.gpx")
+
+solved_mysteries <- all_ready %>% 
+  dplyr::select(gc_code) %>% 
+  dplyr::mutate(solved = TRUE)
+
+missing_finds_mysteries <- missing_finds %>% 
+  dplyr::filter(type == "Unknown Cache") %>% 
+  dplyr::left_join(solved_mysteries, by = "gc_code") %>% 
+  dplyr::mutate(solved = dplyr::if_else(is.na(solved), FALSE, TRUE))
+
+missing_mysteries_summarized <- missing_finds_mysteries %>% 
+  dplyr::group_by(Kommune, solved) %>% 
+  dplyr::summarise(antall = n()) %>% 
+  tidyr::complete(solved = c(TRUE, FALSE), nesting(Kommune), fill = list(antall = 0)) %>% 
+  tidyr::pivot_wider(names_from = Kommune, values_from = antall)
 ```
 
-Antall manglende cachefunn per utleggsår.
+# Antall manglende cachefunn per utleggsår.
 
 ```{r table_per_year}
 missing_finds_per_year %>% 
@@ -120,6 +136,8 @@ missing_finds_per_year %>%
 ```
 
 
+# Antall manglende totalt
+
 ```{r table_total}
 missing_finds_total %>% 
   flextable::flextable() %>% 
@@ -127,8 +145,23 @@ missing_finds_total %>%
   bg(bg = "#c0c0c0", part = "header")
 ```
 
+
+# Antall manglende per type
+
 ```{r table_total_type}
 missing_finds_total_per_type %>% 
+  flextable::flextable() %>% 
+  theme_booktabs(bold_header = TRUE) %>% 
+  bg(bg = "#c0c0c0", part = "header") %>% 
+  set_table_properties(width = .47, 
+                       layout = "autofit")
+```
+
+
+# Antall løste mysterier
+
+```{r mysteries}
+missing_mysteries_summarized %>% 
   flextable::flextable() %>% 
   theme_booktabs(bold_header = TRUE) %>% 
   bg(bg = "#c0c0c0", part = "header") %>% 
