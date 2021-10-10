@@ -5,10 +5,15 @@ output: html_notebook
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
 library(tidyverse)
+library(sf)
+library(geosphere)
 library(leaflet)
+library(htmltools)
 library(knitr)
 ```
 
+# So, the elk is?
+Didn't complete this task programmatically...
 
 ```{r data}
 corners <- data.frame(lng = c(11.04650, 11.04323, 10.99286), 
@@ -24,4 +29,106 @@ corners %>%
                    fillOpacity = 0.6,
                    radius = 4)
 ```
+
+# 1, 2, 3, ...on the 4th it'll be!
+
+```{r 123_points}
+other_caches <- tibble::tibble(name = c("a", "b", "c"),
+                               lng = c(11 + 2.231/60, 11 + 3/60, 11 + 2.5/60),
+                               lat = c(61 + 52.279/60, 61 + 52.7/60, 61 + 52.9/60)) %>% 
+  sf::st_as_sf(coords = c("lng", "lat"), crs = 4326, remove = FALSE)
+
+two_lines <- other_caches %>%
+  # Duplicate second row to get both start and end of the line
+  slice(1, 2, 2, 3) %>%
+  mutate(name = rep(c("ab", "bc"), each = 2)) %>%
+  group_by(name) %>%
+  summarize() %>%
+  sf::st_cast("LINESTRING")
+
+midpoints <- two_lines %>% 
+  # Avoid a warning
+  sf::st_set_agr("constant") %>% 
+  sf::st_centroid()
+
+bearing_at_midpoint_ab <- 
+  geosphere::bearing(sf::as_Spatial(midpoints$geometry[1]), 
+                     sf::as_Spatial(other_caches$geometry[2]))
+
+
+created_point_ab <- 
+  geosphere::destPoint(sf::as_Spatial(midpoints$geometry[1]),
+                       bearing_at_midpoint_ab - 90,
+                       500) %>% 
+  tibble::as_tibble() %>% 
+  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE) %>% 
+  dplyr::mutate(name = "ab")
+
+bearing_at_midpoint_bc <- 
+  geosphere::bearing(sf::as_Spatial(midpoints$geometry[2]), 
+                     sf::as_Spatial(other_caches$geometry[3]))
+
+
+created_point_bc <- 
+  geosphere::destPoint(sf::as_Spatial(midpoints$geometry[2]),
+                       bearing_at_midpoint_bc - 90,
+                       800) %>% 
+  tibble::as_tibble() %>% 
+  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE) %>% 
+  dplyr::mutate(name = "bc")
+
+
+normal_points <- dplyr::bind_rows(created_point_ab,
+                                  created_point_bc)
+
+normal_lines <- normal_points %>%
+  dplyr::select(-lon, -lat) %>% 
+  dplyr::bind_rows(midpoints) %>% 
+  group_by(name) %>%
+  summarize() %>%
+  sf::st_cast("LINESTRING")
+
+ground_zero <- sf::st_intersection(normal_lines$geometry[1], 
+                                   normal_lines$geometry[2])
+
+ground_zero[1]
+
+60*0.03952
+60*0.87648
+```
+
+
+```{r 123_map}
+other_caches %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(stroke = TRUE,
+                   weight = 1.5,
+                   fillOpacity = 0.1,
+                   radius = 4,
+                   label = ~htmltools::htmlEscape(name),
+                   labelOptions = labelOptions(noHide = TRUE)) %>% 
+  addPolylines(data = two_lines,
+               weight = 2,
+               label = ~htmltools::htmlEscape(name),
+               labelOptions = labelOptions(noHide = TRUE)) %>% 
+  addCircleMarkers(data = midpoints,
+                   color = "red",
+                   stroke = TRUE,
+                   weight = 1.5,
+                   fillOpacity = 0.1,
+                   radius = 4) %>% 
+  addCircleMarkers(data = normal_points,
+                   color = "black",
+                   stroke = TRUE,
+                   weight = 1.5,
+                   fillOpacity = 0.1,
+                   radius = 4) %>% 
+  addPolylines(data = normal_lines,
+               weight = 2,
+               color = "red")
+```
+
+
+
 
