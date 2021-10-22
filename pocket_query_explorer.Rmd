@@ -104,6 +104,7 @@ missing_finds_total_per_type <- missing_finds %>%
 all_ready <- read_pq_data("gclists/all_ready.gpx")
 
 solved_mysteries <- all_ready %>% 
+#  dplyr::filter(type == "Unknown Cache") %>% 
   dplyr::select(gc_code) %>% 
   dplyr::mutate(solved = TRUE)
 
