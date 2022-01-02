@@ -6,7 +6,7 @@ output: html_notebook
 ```{r setup, include=FALSE, message=FALSE}
 library(tidyverse)
 library(googlesheets4)
-library(googledrive)1
+library(googledrive)
 library(rgdal)
 library(leaflet)
 
@@ -18,6 +18,38 @@ knitr::opts_chunk$set(echo = FALSE,
 
 googlesheets4::sheets_auth(scope = "https://www.googleapis.com/auth/drive")
 googledrive::drive_auth(token = sheets_token())
+
+# Map essentials ####
+kartverket_map_url <-
+  "https://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=topo4&zoom={z}&x={x}&y={y}"
+
+kartverket_map_attribution <-
+  "<a href='https://www.kartverket.no/'>Kartverket</a>"
+
+kartverket_crs <- leafletCRS(
+  crsClass = "L.Proj.CRS", code = "EPSG:25833",
+  proj4def = "+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs",
+  resolutions = c(
+    21674.7100160867,
+    10837.35500804335,
+    5418.677504021675,
+    2709.3387520108377,
+    1354.6693760054188,
+    677.3346880027094,
+    338.6673440013547,
+    169.33367200067735,
+    84.66683600033868,
+    42.33341800016934,
+    21.16670900008467,
+    10.583354500042335,
+    5.291677250021167,
+    2.6458386250105836,
+    1.3229193125052918,
+    0.6614596562526459,
+    0.33072982812632296,
+    0.16536491406316148
+  ),
+  origin = c(-2500000.0, 9045984.0))
 ```
 
 ```{r coordinates, include=FALSE}
@@ -37,7 +69,7 @@ skijegerposter <- poster %>%
 # rgdal::writeOGR
 
 poster_til_gpx <- skijegerposter %>% 
-  dplyr::filter(Ar == 2021) %>% 
+  dplyr::filter(Ar == 2022) %>% 
   dplyr::mutate(#name = paste(Postnr, Opplegg, Ar, sep = " "),
                 name = as.character(Postnr),
                 lat = as.numeric(lat),
@@ -67,6 +99,27 @@ poster_til_gpx %>%
   leaflet::addCircleMarkers(radius = 8, weight = 3, fill = TRUE, 
                             opacity = 0.8, fillOpacity = 0.1,
                             label = ~paste(name, "\n", desc))
+```
+
+
+```{r map_topo4}
+poster_til_gpx %>% 
+  leaflet::leaflet(
+    width = "100%",
+    options = leafletOptions(
+      crs = kartverket_crs,
+      zoomControl = T
+      )
+  ) %>% 
+  leaflet::addTiles(
+    urlTemplate = kartverket_map_url,
+    attribution = kartverket_map_attribution
+  ) %>% 
+  leaflet::addCircleMarkers(
+    radius = 8, weight = 3, fill = TRUE, 
+    opacity = 0.8, fillOpacity = 0.1,
+    label = ~paste(name, "\n", desc)
+  )
 ```
 
 
