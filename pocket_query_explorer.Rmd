@@ -13,6 +13,7 @@ library(leaflet)
 library(knitr)
 library(flextable)
 library(scales)
+library(DT)
 
 knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE,
@@ -34,30 +35,74 @@ my_pois <- tibble::tibble(place_name = c("home"),
 #pq_layers <- sf::st_layers(pocket_query)
 
 # TODO: differentiate bewtween pq and downloaded list: The former has DT info, the latter doesn't!
+#pq_gpx_file <- "gclists/hamar.gpx"
 
 read_pq_data <- function(pq_gpx_file) {
   
-  pq_data <- sf::st_read(pq_gpx_file, layer = "waypoints", quiet = TRUE) %>%
-    dplyr::select(gc_code = name, title = urlname, desc, placed_on = time, type) %>%
-    dplyr::filter(stringr::str_detect(gc_code, "^GC")) %>%
-    tidyr::separate(desc, c("name_dup", "rest"), sep = "by ") %>%
-    tidyr::separate(rest, c("co", "dt"), sep = "\\(") %>%
-    tidyr::separate(dt, c("difficulty", "terrain"), sep = "/") %>%
-    dplyr::mutate(co = stringr::str_replace(co, ", Traditional Cache", ""),
-                  co = stringr::str_replace(co, ", Virtual Cache", ""),
-                  co = stringr::str_replace(co, ", Earthcache", ""),
-                  difficulty = as.numeric(difficulty),
-                  terrain = as.numeric(stringr::str_sub(terrain, 1, -2)),
-                  placed_on = lubridate::as_date(placed_on),
-                  year = lubridate::year(placed_on),
-                  month = lubridate::month(placed_on),
-                  day = lubridate::mday(placed_on),
-                  type = stringr::str_sub(type, 10, -1),
-                  distance_from_home = sf::st_distance(geometry, my_pois$geometry[1]) %>%
-                    round()) %>%
-    dplyr::select(type, gc_code, title, co, difficulty, terrain, 
-                  placed_on, year, month, day,
-                  distance_from_home)
+  pq_data <- 
+    sf::st_read(
+      pq_gpx_file, 
+      layer = "waypoints", 
+      quiet = TRUE
+    ) %>%
+    dplyr::select(
+      gc_code = name, 
+      title = urlname, 
+      desc, 
+      placed_on = time, 
+      type
+    ) %>%
+    dplyr::filter(
+      stringr::str_detect(gc_code, "^GC")
+    ) %>%
+    tidyr::separate(
+      desc, 
+      c("name_dup", "rest"), 
+      sep = " by "
+    ) %>%
+    tidyr::separate(
+      rest, 
+      c("co", "dt"), 
+      sep = "\\("
+    ) %>%
+    tidyr::separate(
+      dt, 
+      c("difficulty", "terrain"), 
+      sep = "/"
+    ) %>%
+    dplyr::mutate(
+      title = stringr::str_trim(title),
+      co = stringr::str_replace(co, ", Traditional Cache", ""),
+      co = stringr::str_replace(co, ", Virtual Cache", ""),
+      co = stringr::str_replace(co, ", Earthcache", ""),
+      difficulty = as.numeric(difficulty),
+      terrain = as.numeric(stringr::str_sub(terrain, 1, -2)),
+      placed_on = lubridate::as_date(placed_on),
+      year = lubridate::year(placed_on),
+      month = lubridate::month(placed_on),
+      day = lubridate::mday(placed_on),
+      type = stringr::str_sub(type, 10, -1),
+      type = dplyr::case_when(
+        stringr::str_starts(title, "Challenge:") ~ "Challenge Cache",
+        TRUE ~ type
+      ),
+      distance_from_home = 
+        sf::st_distance(geometry, my_pois$geometry[1]) %>%
+                    round()
+    ) %>%
+    dplyr::select(
+      type, 
+      gc_code, 
+      title, 
+      co, 
+      difficulty, 
+      terrain,
+      placed_on, 
+      year, 
+      month, 
+      day,
+      distance_from_home
+    )
   }
 ```
 
@@ -65,27 +110,27 @@ read_pq_data <- function(pq_gpx_file) {
 ```{r read}
 #pq_data <- read_pq_data("gclists/to_find_trd.gpx")
   
-trondheim_kommune <- read_pq_data("gclists/trd_kommune.gpx") %>% 
+trondheim <- read_pq_data("gclists/trondheim.gpx") %>% 
   dplyr::mutate(Kommune = "Trondheim")
 
-rendalen_kommune <- read_pq_data("gclists/rendalen_kommune.gpx") %>% 
+rendalen <- read_pq_data("gclists/rendalen.gpx") %>% 
   dplyr::mutate(Kommune = "Rendalen")
 
-hamar_kommune <- read_pq_data("gclists/hamar_kommune.gpx") %>% 
+hamar <- read_pq_data("gclists/hamar.gpx") %>% 
   dplyr::mutate(Kommune = "Hamar")
 
 missing_finds <- 
   dplyr::bind_rows(
-    trondheim_kommune,
-    rendalen_kommune,
-    hamar_kommune
+    trondheim,
+    rendalen,
+    hamar
   ) %>% 
   sf::st_drop_geometry()
 
 missing_finds_per_year <- missing_finds %>% 
   dplyr::group_by(year, Kommune) %>% 
   dplyr::summarise(antall = n(), .groups = "drop") %>% 
-  tidyr::complete(year = 2001:2020, nesting(Kommune), fill = list(antall = 0)) %>% 
+  tidyr::complete(year = 2001:2022, nesting(Kommune), fill = list(antall = 0)) %>% 
   tidyr::pivot_wider(names_from = Kommune, values_from = antall)
   
 missing_finds_total <- missing_finds %>% 
@@ -104,20 +149,40 @@ missing_finds_total_per_type <- missing_finds %>%
 all_ready <- read_pq_data("gclists/all_ready.gpx")
 
 solved_mysteries <- all_ready %>% 
-#  dplyr::filter(type == "Unknown Cache") %>% 
   dplyr::select(gc_code) %>% 
   dplyr::mutate(solved = TRUE)
 
-missing_finds_mysteries <- missing_finds %>% 
-  dplyr::filter(type == "Unknown Cache") %>% 
-  dplyr::left_join(solved_mysteries, by = "gc_code") %>% 
-  dplyr::mutate(solved = dplyr::if_else(is.na(solved), FALSE, TRUE))
+missing_finds_mysteries <- 
+  missing_finds %>% 
+  dplyr::filter(
+    type == "Unknown Cache"
+  ) %>% 
+  dplyr::left_join(
+    solved_mysteries, 
+    by = "gc_code"
+  ) %>% 
+  dplyr::mutate(
+    solved = dplyr::if_else(is.na(solved), FALSE, TRUE)
+  )
 
-missing_mysteries_summarized <- missing_finds_mysteries %>% 
-  dplyr::group_by(Kommune, solved) %>% 
-  dplyr::summarise(antall = n()) %>% 
-  tidyr::complete(solved = c(TRUE, FALSE), nesting(Kommune), fill = list(antall = 0)) %>% 
-  tidyr::pivot_wider(names_from = Kommune, values_from = antall)
+missing_mysteries_summarized <- 
+  missing_finds_mysteries %>% 
+  dplyr::group_by(
+    Kommune, 
+    solved
+  ) %>% 
+  dplyr::summarise(
+    antall = n()
+  ) %>% 
+  tidyr::complete(
+    solved = c(TRUE, FALSE), 
+    nesting(Kommune), 
+    fill = list(antall = 0)
+  ) %>% 
+  tidyr::pivot_wider(
+    names_from = Kommune, 
+    values_from = antall
+  )
 ```
 
 # Antall manglende cachefunn per utleggsår.
@@ -169,4 +234,30 @@ missing_mysteries_summarized %>%
   set_table_properties(width = .47, 
                        layout = "autofit")
 ```
+
+
+# Uløste mysterier
+
+```{r unsolved}
+missing_finds_mysteries %>%
+  dplyr::filter(
+    solved == FALSE
+  ) %>% 
+  dplyr::select(
+    Titel = title,
+    CO = co,
+    Utlagt = year,
+    Kommune
+  ) %>% 
+  DT::datatable(
+    filter = "top",
+    options = list(
+      dom = "Blfrtip",
+      pageLength = 25,
+      lengthMenu = c(25, 50, 100),
+      autoWidth = TRUE))
+```
+
+
+
 
