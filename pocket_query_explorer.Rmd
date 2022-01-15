@@ -1,8 +1,10 @@
 ---
-title: "Gjenstående cacher"
+title: "Gjenstående cacher for snohan"
 knit: (function(input_file, encoding){
   rmarkdown::render(input_file, encoding=encoding, output_file = 'docs/index.html')})
-output: html_document
+output: 
+  html_document:
+    css: "geofun.css"
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -47,7 +49,8 @@ read_pq_data <- function(pq_gpx_file) {
     ) %>%
     dplyr::select(
       gc_code = name, 
-      title = urlname, 
+      title = urlname,
+      url,
       desc, 
       placed_on = time, 
       type
@@ -93,7 +96,8 @@ read_pq_data <- function(pq_gpx_file) {
     dplyr::select(
       type, 
       gc_code, 
-      title, 
+      title,
+      url,
       co, 
       difficulty, 
       terrain,
@@ -185,7 +189,7 @@ missing_mysteries_summarized <-
   )
 ```
 
-# Antall manglende cachefunn per utleggsår.
+## Antall manglende cachefunn per utleggsår
 
 ```{r table_per_year}
 missing_finds_per_year %>% 
@@ -202,7 +206,7 @@ missing_finds_per_year %>%
 ```
 
 
-# Antall manglende totalt
+## Antall manglende totalt
 
 ```{r table_total}
 missing_finds_total %>% 
@@ -212,7 +216,7 @@ missing_finds_total %>%
 ```
 
 
-# Antall manglende per type
+## Antall manglende per type
 
 ```{r table_total_type}
 missing_finds_total_per_type %>% 
@@ -224,7 +228,7 @@ missing_finds_total_per_type %>%
 ```
 
 
-# Antall løste mysterier
+## Antall løste mysterier
 
 ```{r mysteries}
 missing_mysteries_summarized %>% 
@@ -236,15 +240,25 @@ missing_mysteries_summarized %>%
 ```
 
 
-# Uløste mysterier
+## Uløste mysterier
 
 ```{r unsolved}
 missing_finds_mysteries %>%
   dplyr::filter(
     solved == FALSE
   ) %>% 
+  dplyr::mutate(
+    title_url = 
+      paste0(
+        "<a href=\"",
+        url,
+        "\" target=\"_blank\">",
+        title,
+        "</a>"
+      )
+  ) %>% 
   dplyr::select(
-    Titel = title,
+    Tittel = title_url,
     CO = co,
     Utlagt = year,
     Kommune
@@ -255,7 +269,9 @@ missing_finds_mysteries %>%
       dom = "Blfrtip",
       pageLength = 25,
       lengthMenu = c(25, 50, 100),
-      autoWidth = TRUE))
+      autoWidth = TRUE),
+    escape = FALSE
+  )
 ```
 
 
