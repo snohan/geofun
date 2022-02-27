@@ -7,6 +7,7 @@ output: html_notebook
 library(tidyverse)
 library(sf)
 library(geosphere)
+library(nvctr)
 library(leaflet)
 library(htmltools)
 library(knitr)
@@ -33,10 +34,23 @@ corners %>%
 # 1, 2, 3, ...on the 4th it'll be!
 
 ```{r 123_points}
-other_caches <- tibble::tibble(name = c("a", "b", "c"),
-                               lng = c(11 + 2.231/60, 11 + 3/60, 11 + 2.5/60),
-                               lat = c(61 + 52.279/60, 61 + 52.7/60, 61 + 52.9/60)) %>% 
-  sf::st_as_sf(coords = c("lng", "lat"), crs = 4326, remove = FALSE)
+other_caches <- 
+  tibble::tibble(
+    name = c("a", "b", "c"),
+    lng = c(11 + 2.231/60, 11 + 3/60, 11 + 2.5/60),
+    lat = c(61 + 52.279/60, 61 + 52.7/60, 61 + 52.9/60)
+  ) %>% 
+  #sf::st_as_sf(coords = c("lng", "lat"), crs = 4326, remove = FALSE) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    n_vector = list(
+      nvctr::lat_lon2n_E(
+        nvctr::rad(lat),
+        nvctr::rad(lng)
+      )
+    )
+  ) %>% 
+  dplyr::ungroup()
 
 two_lines <- other_caches %>%
   # Duplicate second row to get both start and end of the line
@@ -95,6 +109,24 @@ ground_zero[1]
 
 60*0.03952
 60*0.87648
+
+## Alternative solution using n_vectors ----
+# 26.02.2022
+mean_position <-
+  nvctr::unit(
+    other_caches$n_vector[[1]] +
+      other_caches$n_vector[[2]] +
+      other_caches$n_vector[[3]]
+  ) %>% 
+  nvctr::n_E2lat_lon() %>% 
+  nvctr::deg()
+# YES!
+
+n_minutes <- (mean_position[1] - base::trunc(mean_position[1])) * 60
+e_minutes <- (mean_position[2] - base::trunc(mean_position[2])) * 60
+# N 61 52.626
+# E 11 02.577 
+# Tror mer på denne metoden! Mye enkere! :)
 ```
 
 

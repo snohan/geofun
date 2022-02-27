@@ -90,98 +90,6 @@ mean_position_2 <-
 # circumradius <- sqrt(((1 + sqrt(5)) / 2)^2 + 1)
 # 
 # # http://csharphelper.com/blog/2015/12/platonic-solids-part-6-the-icosahedron/
-# 
-# vertices <-
-#   dplyr::bind_rows(
-#     vertices_given,
-#     vertices_opposite_given
-#   ) %>% 
-#   dplyr::mutate(
-#     vertex = paste0("v", seq(1:(2*nrow(vertices_given)))),
-#     latrad = (90 - lat) / 180 * pi,
-#     lonrad = 
-#       dplyr::case_when(
-#         lon >= 0 ~ lon / 180 * pi,
-#         lon < 0 ~ (360 + lon) / 180 * pi
-#       ),
-#     x = circumradius * sin(latrad) * cos(lonrad),
-#     y = circumradius * sin(latrad) * sin(lonrad),
-#     z = circumradius * cos(latrad)
-#   ) %>% 
-#   dplyr::mutate(
-#     dplyr::across(
-#       .cols = x:z,
-#       .fns = ~ round(.x, digits = 5)
-#     )
-#   ) %>%
-#   dplyr::arrange(
-#     x
-#   )# %>% 
-  # dplyr::rowwise() %>% 
-  # dplyr::mutate(
-  #   c_vector = 
-  #     list(
-  #       as.vector(c(x, y, z))
-  #     )
-  # ) %>% 
-  # dplyr::ungroup()
-
-# The two missing x values must be plus-minus 1.15344, since all other x values
-# come in pairs, which must mean that there is no rotation around the z axis.
-# Further, there must be a rotation around the y axis, since we don't have
-# x values as 0, 1 and phi.
-
-
-# Rotating to get nicer coordinates
-# c <- 
-#   acos(
-#     vertices$x[10] / ((1 + sqrt(5)) / 2)
-#   ) * (-1)
-# 
-# rotate_z <-
-#   matrix(
-#     c(cos(c), sin(c), 0,
-#     -sin(c), cos(c), 0,
-#     0, 0, 1),
-#     nrow = 3,
-#     ncol = 3
-#   )
-# 
-# b <- 
-#   acos(
-#     vertices$x[10] / ((1 + sqrt(5)) / 2)
-#   ) * (-1)
-# 
-# rotate_z <-
-#   matrix(
-#     c(cos(c), sin(c), 0,
-#       -sin(c), cos(c), 0,
-#       0, 0, 1),
-#     nrow = 3,
-#     ncol = 3
-#   )
-# 
-# new_coordinates <-
-#   rotate_z %*% vertices$m_vector[10][[1]]
-
-
-
-
-
-
-
-# Choosing the first vertex and moving it to origin
-x_adjustment <- 0 - vertices$x[1]
-y_adjustment <- 1 - vertices$y[1]
-z_adjustment <- (1 + sqrt(5)) / 2 - vertices$z[1]
-
-vertices_translated <-
-  vertices %>% 
-  dplyr::mutate(
-    x_trans = x + x_adjustment,
-    y_trans = y + y_adjustment,
-    z_trans = z + z_adjustment
-  )
 
 
 
@@ -213,3 +121,60 @@ nullpunkt <- tibble::tibble(cache_name = c("The Large Heap"),
   dplyr::mutate(min_e = calculate_decimal_minutes(east),
                 min_n = calculate_decimal_minutes(north))
 
+
+# Bartejul20-12 - Halvveis V ----
+# 4.9 km fra Krokstien 63 23.617 10 24.838
+# 6.3 km fra Statens hus 25.716 23.584
+# 1.9 km fra 22.145 20.449
+
+measured_points <-
+  tibble::tibble(
+    lat = c(
+      63 + 23.617 / 60, 
+      63 + 25.716 / 60,
+      63 + 22.145 / 60  
+    ),
+    lon = c(
+      10 + 24.838 / 60,
+      10 + 23.584 / 60,
+      10 + 20.449 / 60
+    ),
+    distance = c(
+      4.9e3, 
+      6.3e3, 
+      1.9e3
+    )
+  ) %>% 
+  # dplyr::rowwise() %>% 
+  # dplyr::mutate(
+  #   n_vector = list(
+  #     nvctr::lat_lon2n_E(
+  #       nvctr::rad(lat),
+  #       nvctr::rad(lon)
+  #     )
+  #   )
+  # ) %>% 
+  # dplyr::ungroup() %>% 
+  sf::st_as_sf(
+    coords = c("lon", "lat"),
+    crs = 4326
+  ) %>% 
+  sf::st_transform(32632) 
+
+circles <-
+  measured_points %>% 
+  sf::st_buffer(
+    dist = measured_points$distance
+  )
+
+map_circles <- 
+  circles %>% 
+  sf::st_transform(4326) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addPolylines(
+    weight = 2
+  )
+# Nøyaktig samme resultat som med verktøyet i G Toolbox
+# Midt på vegen
+# Antar mellom vegen og elva.

@@ -6,4 +6,4 @@
 *.txt
 *.zip
 *_cache/*
-*html
+*.html
