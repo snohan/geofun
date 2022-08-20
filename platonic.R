@@ -3,6 +3,7 @@ library(tidyverse)
 library(sf)
 library(geosphere)
 library(nvctr)
+library(leaflet)
 
 # A Platonic Cache ----
 # Must be a regular icosahedron circumscribed by a sphere, 
@@ -95,8 +96,12 @@ mean_position_2 <-
 
 # The Large Heap ----
 calculate_decimal_minutes <- function(decimal_degrees) {
-  decimal_minutes <- round((decimal_degrees - floor(decimal_degrees)) * 60,
-                           digits = 3)
+  
+  decimal_minutes <- 
+    base::round(
+      (decimal_degrees - base::floor(decimal_degrees)) * 60,
+      digits = 3)
+  
 }
 
 addition_number <- 1.287262935597079127914529663121
@@ -177,4 +182,143 @@ map_circles <-
   )
 # Nøyaktig samme resultat som med verktøyet i G Toolbox
 # Midt på vegen
-# Antar mellom vegen og elva.
+# Antar mellom vegen og elva. YESS!
+
+
+# Har du peiling? ----
+measured_points <-
+  tibble::tibble(
+    lat = c(
+      63 + 23.620 / 60, 
+      63 + 22.145 / 60  
+    ),
+    lon = c(
+      10 + 24.835 / 60,
+      10 + 20.449 / 60
+    ),
+    bearing = c(
+      194, 
+      158
+    )
+  ) %>% 
+  sf::st_as_sf(
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+
+# BP#25 The lost and found cache 2 ----
+# Tre punkter i en trekant
+# A er den vi skal finne, Lost 2
+# B er Lost 1
+# C er En liten perle
+
+caches <-
+  tibble::tibble(
+    name = c(
+      "Lost 1",
+      "Perle"
+    ),
+    lat = c(
+      63 + 23.098 / 60,
+      63 + 23.011 / 60  
+    ),
+    lon = c(
+      10 + 17.041 / 60,
+      10 + 17.618 / 60
+    ),
+    alt = c(
+      0,
+      0
+    )
+  ) %>% 
+  dplyr::rowwise() %>%
+  dplyr::mutate(
+    # n_vector = list(
+    #   nvctr::lat_lon2n_E(
+    #     nvctr::rad(lat),
+    #     nvctr::rad(lon)
+    #   )
+    # ),
+    # Creating North-East-Up vectors
+    neu_vector = list(
+      c(lat, lon, alt)
+    )
+  ) %>%
+  dplyr::ungroup() %>%
+  sf::st_as_sf(
+    coords = c("lon", "lat"),
+    crs = 4326,
+    remove = FALSE
+  )
+
+# Finner retning og avstand fra Lost 1 til Perle:
+from_L1_to_Perle <-
+  nvctr::altitude_azimuth_distance(
+    caches$neu_vector[[1]],
+    caches$neu_vector[[2]]
+  )
+
+# Vinkelen mellom AB og BC
+angle_AB_BC <-
+  # Oppgitt retning B-A - 180
+  # +
+  # 180 - retningen B-C
+  (261 - 180) + (180 - from_L1_to_Perle[2])
+
+# Oppgitt i oppgaven
+given_d <- 471.471
+
+# Bruker cosinusloven
+AB = (from_L1_to_Perle[3]^2 - given_d^2) / (2 * given_d + 2 * from_L1_to_Perle[3] * cos(angle_AB_BC * pi / 180))
+
+# Finding A
+gz <- 
+  geosphere::destPoint(
+    p = c(caches$lon[1], caches$lat[1]),
+    b = 261,
+    d = AB
+  )
+
+gz_df <-
+  tibble::tibble(
+    name = c(
+      "Lost 2"
+    ),
+    lat = c(
+      gz[2]
+    ),
+    lon = c(
+      gz[1]
+    )
+  )
+
+
+# TODO: calculate A with n-vectors
+
+all_caches <-
+  caches |> 
+  sf::st_drop_geometry() |> 
+  dplyr::select(
+    name,
+    lat,
+    lon
+  ) |> 
+  dplyr::bind_rows(
+    gz_df
+  ) |> 
+  dplyr::mutate(
+    lat_min = (lat - base::trunc(lat)) * 60,
+    lon_min = (lon - base::trunc(lon)) * 60
+  ) |> 
+  sf::st_as_sf(
+    coords = c("lon", "lat"),
+    crs = 4326,
+    remove = FALSE
+  )
+
+map <- 
+  all_caches |> 
+  leaflet::leaflet() |> 
+  leaflet::addTiles() |> 
+  leaflet::addMarkers()
