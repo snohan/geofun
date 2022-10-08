@@ -8,6 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+base::Sys.setlocale(locale = "nb.utf8")
 library(tidyverse)
 library(sf)
 library(lwgeom)
@@ -17,22 +18,31 @@ library(flextable)
 library(scales)
 library(DT)
 
-knitr::opts_chunk$set(echo = FALSE,
-                      warning = FALSE,
-                      message = FALSE,
-                      error = FALSE,
-                      cache = FALSE)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  error = FALSE,
+  cache = FALSE
+)
 
 # TODO: make a prep script
+today_as_date <- lubridate::today()
 ```
 
 ```{r functions}
 # To calculate distance from 
 # 1. home location N 63° 23.567′ E 10° 25.026′
-my_pois <- tibble::tibble(place_name = c("home"),
-                          lon = c(10.41710),
-                          lat = c(63.39278)) %>% 
-  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326)
+my_pois <- 
+  tibble::tibble(
+    place_name = c("home"),
+    lon = c(10.41710),
+    lat = c(63.39278)
+  ) %>% 
+  sf::st_as_sf(
+    coords = c("lon", "lat"), 
+    crs = 4326
+  )
 
 #pq_layers <- sf::st_layers(pocket_query)
 
@@ -176,7 +186,8 @@ missing_mysteries_summarized <-
     solved
   ) %>% 
   dplyr::summarise(
-    antall = n()
+    antall = n(),
+    .groups = "drop"
   ) %>% 
   tidyr::complete(
     solved = c(TRUE, FALSE), 
@@ -188,6 +199,8 @@ missing_mysteries_summarized <-
     values_from = antall
   )
 ```
+
+Sist oppdatert `r lubridate::mday(today_as_date)`. `r lubridate::month(today_as_date, abbr = F, label = T)` `r lubridate::year(today_as_date)`.
 
 ## Antall manglende cachefunn per utleggsår
 
