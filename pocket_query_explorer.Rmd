@@ -46,7 +46,8 @@ my_pois <-
 
 #pq_layers <- sf::st_layers(pocket_query)
 
-# TODO: differentiate bewtween pq and downloaded list: The former has DT info, the latter doesn't!
+# TODO: differentiate bewtween pq and downloaded list: 
+# The former has DT info, the latter doesn't!
 #pq_gpx_file <- "gclists/hamar.gpx"
 
 read_pq_data <- function(pq_gpx_file) {
@@ -141,7 +142,8 @@ missing_finds <-
   ) %>% 
   sf::st_drop_geometry()
 
-missing_finds_per_year <- missing_finds %>% 
+missing_finds_per_year <- 
+  missing_finds %>% 
   dplyr::group_by(year, Kommune) %>% 
   dplyr::summarise(antall = n(), .groups = "drop") %>% 
   tidyr::complete(year = 2001:2022, nesting(Kommune), fill = list(antall = 0)) %>% 
@@ -288,5 +290,37 @@ missing_finds_mysteries %>%
 ```
 
 
+## Gamle i Trondheim
+Lagt ut før 2011.
 
-
+```{r old}
+trondheim %>%
+  sf::st_drop_geometry() |> 
+  dplyr::filter(
+    year < 2011
+  ) |> 
+  dplyr::mutate(
+    title_url = 
+      paste0(
+        "<a href=\"",
+        url,
+        "\" target=\"_blank\">",
+        title,
+        "</a>"
+      )
+  ) %>% 
+  dplyr::select(
+    Tittel = title_url,
+    CO = co,
+    Utlagt = year
+  ) %>% 
+  DT::datatable(
+    filter = "top",
+    options = list(
+      dom = "Blfrtip",
+      pageLength = 25,
+      lengthMenu = c(25, 50, 100),
+      autoWidth = TRUE),
+    escape = FALSE
+  )
+```
