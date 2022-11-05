@@ -48,7 +48,7 @@ my_pois <-
 
 # TODO: differentiate bewtween pq and downloaded list: 
 # The former has DT info, the latter doesn't!
-#pq_gpx_file <- "gclists/hamar.gpx"
+#pq_gpx_file <- "gclists/trondheim.gpx"
 
 read_pq_data <- function(pq_gpx_file) {
   
@@ -69,28 +69,38 @@ read_pq_data <- function(pq_gpx_file) {
     dplyr::filter(
       stringr::str_detect(gc_code, "^GC")
     ) %>%
-    tidyr::separate(
-      desc, 
-      c("name_dup", "rest"), 
-      sep = " by "
-    ) %>%
-    tidyr::separate(
-      rest, 
-      c("co", "dt"), 
-      sep = "\\("
-    ) %>%
-    tidyr::separate(
-      dt, 
-      c("difficulty", "terrain"), 
-      sep = "/"
-    ) %>%
+    # "desc" is contatenated by "title" and " by [CO]"
+    # deconcatenate:
+    dplyr::mutate(
+      title_length = stringr::str_length(title),
+      co = stringr::str_sub(
+        desc,
+        title_length + 5,
+        -1
+        )
+    ) |> 
+    # tidyr::separate(
+    #   desc, 
+    #   c("name_dup", "rest"), 
+    #   sep = " by "
+    # ) %>%
+    # tidyr::separate(
+    #   rest, 
+    #   c("co", "dt"), 
+    #   sep = "\\("
+    # ) %>%
+    # tidyr::separate(
+    #   dt, 
+    #   c("difficulty", "terrain"), 
+    #   sep = "/"
+    # ) %>%
     dplyr::mutate(
       title = stringr::str_trim(title),
-      co = stringr::str_replace(co, ", Traditional Cache", ""),
-      co = stringr::str_replace(co, ", Virtual Cache", ""),
-      co = stringr::str_replace(co, ", Earthcache", ""),
-      difficulty = as.numeric(difficulty),
-      terrain = as.numeric(stringr::str_sub(terrain, 1, -2)),
+      #co = stringr::str_replace(co, ", Traditional Cache", ""),
+      #co = stringr::str_replace(co, ", Virtual Cache", ""),
+      #co = stringr::str_replace(co, ", Earthcache", ""),
+      #difficulty = as.numeric(difficulty),
+      #terrain = as.numeric(stringr::str_sub(terrain, 1, -2)),
       placed_on = lubridate::as_date(placed_on),
       year = lubridate::year(placed_on),
       month = lubridate::month(placed_on),
@@ -101,8 +111,12 @@ read_pq_data <- function(pq_gpx_file) {
         TRUE ~ type
       ),
       distance_from_home = 
-        sf::st_distance(geometry, my_pois$geometry[1]) %>%
-                    round()
+        sf::st_distance(
+          geometry, 
+          my_pois$geometry[1],
+          by_element = TRUE
+          ) %>%
+          base::round()
     ) %>%
     dplyr::select(
       type, 
@@ -110,8 +124,8 @@ read_pq_data <- function(pq_gpx_file) {
       title,
       url,
       co, 
-      difficulty, 
-      terrain,
+      #difficulty, 
+      #terrain,
       placed_on, 
       year, 
       month, 
@@ -125,13 +139,26 @@ read_pq_data <- function(pq_gpx_file) {
 ```{r read}
 #pq_data <- read_pq_data("gclists/to_find_trd.gpx")
   
-trondheim <- read_pq_data("gclists/trondheim.gpx") %>% 
+trondheim <- 
+  read_pq_data("gclists/trondheim.gpx") |> 
   dplyr::mutate(Kommune = "Trondheim")
 
-rendalen <- read_pq_data("gclists/rendalen.gpx") %>% 
+# Read CSV exportd from Project-GC
+trd <-
+  readr::read_csv(
+    "gclists/trd.csv"
+  ) |> 
+  dplyr::select(
+    gc_code = "GC-kode",
+    difficulty = Vanskelighetsgrad,
+    terrain = Terreng
+  )
+
+rendalen <- 
+  read_pq_data("gclists/rendalen.gpx") |> 
   dplyr::mutate(Kommune = "Rendalen")
 
-hamar <- read_pq_data("gclists/hamar.gpx") %>% 
+hamar <- read_pq_data("gclists/hamar.gpx")|> 
   dplyr::mutate(Kommune = "Hamar")
 
 missing_finds <- 
@@ -324,3 +351,36 @@ trondheim %>%
     escape = FALSE
   )
 ```
+
+
+## DT i Trondheim
+
+```{r dt}
+trondheim_dt <-
+  trondheim |> 
+  dplyr::left_join(
+    trd,
+    by = c("gc_code")
+  ) |> 
+  dplyr::mutate(
+    difficulty = as.factor(difficulty),
+    terrain = as.factor(terrain)
+  )
+```
+
+```{r d}
+trondheim_dt |> 
+  ggplot(
+    aes(difficulty)
+  ) +
+  geom_bar()
+```
+
+```{r t}
+trondheim_dt |> 
+  ggplot(
+    aes(terrain)
+  ) +
+  geom_bar()
+```
+
