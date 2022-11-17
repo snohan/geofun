@@ -384,3 +384,22 @@ trondheim_dt |>
   geom_bar()
 ```
 
+```{r graph}
+# Finding all possible combinations of difficulty
+dt <- 
+  trondheim_dt |> 
+  dplyr::select(
+    gc_code,
+    title,
+    difficulty,
+    distance_from_home
+  ) |> 
+  dplyr::group_by(
+    difficulty
+  ) |> 
+  dplyr::slice_min(
+    order_by = distance_from_home,
+    n = 2
+  )
+```
+

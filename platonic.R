@@ -189,22 +189,35 @@ map_circles <-
 measured_points <-
   tibble::tibble(
     lat = c(
-      63 + 23.620 / 60, 
-      63 + 22.145 / 60  
+      #63 + 23.620 / 60, 
+      #63 + 22.145 / 60,
+      63.3479237,
+      63.3479072
     ),
     lon = c(
-      10 + 24.835 / 60,
-      10 + 20.449 / 60
+      #10 + 24.835 / 60,
+      #10 + 20.449 / 60
+      10.3691901,
+      10.3830922
     ),
     bearing = c(
-      194, 
-      158
+      #194, 
+      #158
+      186,
+      203
     )
   ) %>% 
   sf::st_as_sf(
     coords = c("lon", "lat"),
     crs = 4326
   )
+
+# TODO: calculate intersection using n-vectors
+# 1. Find a point far away along the bearing
+# 2. Make a linestring
+# 3. find intersection
+# 4. Plot in map
+
 
 
 # BP#25 The lost and found cache 2 ----
