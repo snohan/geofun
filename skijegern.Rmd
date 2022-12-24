@@ -4,20 +4,30 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE, message=FALSE}
+base::Sys.setlocale(locale = "nb.utf8")
 library(tidyverse)
-library(googlesheets4)
-library(googledrive)
-library(rgdal)
+library(sf)
+#library(googlesheets4)
+#library(googledrive)
+#library(rgdal)
 library(leaflet)
 
-knitr::opts_chunk$set(echo = FALSE,
-                      warning = FALSE,
-                      message = FALSE,
-                      error = FALSE,
-                      cache = TRUE)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  error = FALSE,
+  cache = TRUE
+)
 
-googlesheets4::sheets_auth(scope = "https://www.googleapis.com/auth/drive")
-googledrive::drive_auth(token = sheets_token())
+# Access to Google Drive and Sheets
+# googledrive::drive_auth(email = "snorrh@gmail.com")
+# googlesheets4::gs4_auth(token = drive_token())
+# 
+# googlesheets4::gs4_auth()
+# 
+# my_files <- googledrive::drive_find()
+
 
 # Map essentials ####
 kartverket_map_url <-
@@ -52,43 +62,69 @@ kartverket_crs <- leafletCRS(
   origin = c(-2500000.0, 9045984.0))
 ```
 
-```{r coordinates, include=FALSE}
-turo <- googledrive::drive_get("Turorientering")
-poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
+```{r coordinates, include=FALSE, message=FALSE}
+#turo <- googledrive::drive_get("Turorientering")
+#poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
+
+# poster <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1d6CEo0omjhowD-Dp2AQ_HsuaF6IA-QmKmmBCjUAcum0/edit#gid=0")
 
 # TODO: understand æøå!
 # Need devtools::install_github("r-lib/gargle"), but have no rights...
 # Await new release of gargle on CRAN
 
-skijegerposter <- poster %>% 
-  dplyr::filter(Opplegg == "Skijegern") %>% 
+skijegerposter <- 
+  readr::read_csv2(
+    "skijegern.csv",
+    show_col_types = FALSE
+  ) |> 
   dplyr::filter(!is.na(lat))
+
+# skijegerposter <- 
+#   poster %>% 
+#   dplyr::filter(Opplegg == "Skijegern") %>% 
+#   dplyr::filter(!is.na(lat))
 ```
 
 ```{r gpx_file, include=FALSE}
-# rgdal::writeOGR
+poster_til_gpx <- 
+  skijegerposter %>% 
+  #dplyr::filter(Ar == 2022) %>% 
+  dplyr::mutate(
+    name = as.character(Postnr),
+    #lat = as.numeric(lat),
+    #lon = as.numeric(lon)
+  ) %>% 
+  dplyr::select(
+    name, 
+    desc = Beskrivelse, 
+    lat, 
+    lon
+  ) |> 
+  sf::st_as_sf(
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
 
-poster_til_gpx <- skijegerposter %>% 
-  dplyr::filter(Ar == 2022) %>% 
-  dplyr::mutate(#name = paste(Postnr, Opplegg, Ar, sep = " "),
-                name = as.character(Postnr),
-                lat = as.numeric(lat),
-                lon = as.numeric(lon)) %>% 
-  dplyr::rename(desc = Beskrivelse) %>% 
-  dplyr::select(name, desc, lat, lon)
+poster_til_gpx |> 
+  sf::st_write(
+    dsn = "skijeger_2023.gpx"
+  )
 
-data_til_gpx <- sp::SpatialPointsDataFrame(
-  coords = poster_til_gpx[,c(4, 3)],
-  data = poster_til_gpx,
-  proj4string = CRS("+proj=longlat + ellps=WGS84"))
-
-rgdal::writeOGR(data_til_gpx, 
-                dsn = "poster.gpx",
-                dataset_options = "GPX_USE_EXTENSIONS=yes",
-                layer = "waypoints",
-                driver = "GPX",
-                overwrite_layer = TRUE)
-
+# data_til_gpx <- 
+#   sp::SpatialPointsDataFrame(
+#     coords = poster_til_gpx[,c(4, 3)],
+#     data = poster_til_gpx,
+#     proj4string = CRS("+proj=longlat + ellps=WGS84")
+#   )
+# 
+# rgdal::writeOGR(
+#   data_til_gpx, 
+#   dsn = "poster.gpx",
+#   dataset_options = "GPX_USE_EXTENSIONS=yes",
+#   layer = "waypoints",
+#   driver = "GPX",
+#   overwrite_layer = TRUE
+# )
 ```
 
 
@@ -96,30 +132,32 @@ rgdal::writeOGR(data_til_gpx,
 poster_til_gpx %>% 
   leaflet::leaflet(width = "100%") %>% 
   leaflet::addTiles() %>% 
-  leaflet::addCircleMarkers(radius = 8, weight = 3, fill = TRUE, 
-                            opacity = 0.8, fillOpacity = 0.1,
-                            label = ~paste(name, "\n", desc))
-```
-
-
-```{r map_topo4}
-poster_til_gpx %>% 
-  leaflet::leaflet(
-    width = "100%",
-    options = leafletOptions(
-      crs = kartverket_crs,
-      zoomControl = T
-      )
-  ) %>% 
-  leaflet::addTiles(
-    urlTemplate = kartverket_map_url,
-    attribution = kartverket_map_attribution
-  ) %>% 
   leaflet::addCircleMarkers(
     radius = 8, weight = 3, fill = TRUE, 
     opacity = 0.8, fillOpacity = 0.1,
     label = ~paste(name, "\n", desc)
   )
+```
+
+
+```{r map_topo4}
+# poster_til_gpx %>% 
+#   leaflet::leaflet(
+#     width = "100%",
+#     options = leafletOptions(
+#       crs = kartverket_crs,
+#       zoomControl = T
+#       )
+#   ) %>% 
+#   leaflet::addTiles(
+#     urlTemplate = kartverket_map_url,
+#     attribution = kartverket_map_attribution
+#   ) %>% 
+#   leaflet::addCircleMarkers(
+#     radius = 8, weight = 3, fill = TRUE, 
+#     opacity = 0.8, fillOpacity = 0.1,
+#     label = ~paste(name, "\n", desc)
+#   )
 ```
 
 
