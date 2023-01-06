@@ -1,9 +1,34 @@
 # Solving mysteries...
-library(tidyverse)
-library(sf)
-library(geosphere)
-library(nvctr)
-library(leaflet)
+{
+  library(tidyverse)
+  library(sf)
+  library(geosphere)
+  library(nvctr)
+  library(leaflet)
+  library(pracma)
+}
+
+calculate_initial_direction_of_path <- function(n_vector, bearing) {
+  
+  # Bearing in radians
+  
+  k_east = 
+    pracma::cross(
+      c(0, 0, 1), # coordinate frame along Earth's rotational axis
+      n_vector
+    ) |> 
+    nvctr::unit()
+  
+  k_north = pracma::cross(
+    n_vector,
+    k_east
+  )
+  
+  inital_direction_of_path <- 
+    k_north * cos(bearing) + k_east * sin(bearing)
+  
+}
+
 
 # A Platonic Cache ----
 # Must be a regular icosahedron circumscribed by a sphere, 
@@ -185,40 +210,63 @@ map_circles <-
 # Antar mellom vegen og elva. YESS!
 
 
-# Har du peiling? ----
+# GC9NJMH Har du peiling? ----
+
+# 1. Triangulate from two measured points
+# 2. Plot in map
+
 measured_points <-
   tibble::tibble(
     lat = c(
-      #63 + 23.620 / 60, 
-      #63 + 22.145 / 60,
-      63.3479237,
-      63.3479072
+      63.34793,
+      63.34790
     ),
     lon = c(
-      #10 + 24.835 / 60,
-      #10 + 20.449 / 60
-      10.3691901,
-      10.3830922
+      10.36920,
+      10.38315
     ),
     bearing = c(
-      #194, 
-      #158
       186,
       203
     )
-  ) %>% 
-  sf::st_as_sf(
-    coords = c("lon", "lat"),
-    crs = 4326
+  ) |> 
+  dplyr::mutate(
+    lat_rad = nvctr::rad(lat),
+    lon_rad = nvctr::rad(lon),
+    azimuth = nvctr::rad(bearing)
+  ) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    n_vector =
+      list(
+        nvctr::lat_lon2n_E(
+          latitude = lat_rad,
+          longitude = lon_rad
+        )
+      ),
+    initial_direction_of_path =
+      list(
+        calculate_initial_direction_of_path(n_vector, azimuth)
+      ),
+    great_circle_n_vector =
+      list(
+        pracma::cross(
+          initial_direction_of_path,
+          n_vector
+        )
+      )
   )
 
-# TODO: calculate intersection using n-vectors
-# 1. Find a point far away along the bearing
-# 2. Make a linestring
-# 3. find intersection
-# 4. Plot in map
+gz <-
+  pracma::cross(
+    measured_points$great_circle_n_vector[[2]],
+    measured_points$great_circle_n_vector[[1]]
+  ) |> 
+  nvctr::unit() |> 
+  nvctr::n_E2lat_lon() |> 
+  nvctr::deg()
 
-
+# Ser riktig ut: elskap ved bussholdeplass.
 
 # BP#25 The lost and found cache 2 ----
 # Tre punkter i en trekant
