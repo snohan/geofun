@@ -48,7 +48,7 @@ my_pois <-
 
 # TODO: differentiate bewtween pq and downloaded list: 
 # The former has DT info, the latter doesn't!
-#pq_gpx_file <- "gclists/trondheim.gpx"
+pq_gpx_file <- "gclists/trondheim.gpx"
 
 read_pq_data <- function(pq_gpx_file) {
   
@@ -110,13 +110,13 @@ read_pq_data <- function(pq_gpx_file) {
         stringr::str_starts(title, "Challenge:") ~ "Challenge Cache",
         TRUE ~ type
       ),
-      distance_from_home = 
-        sf::st_distance(
-          geometry, 
-          my_pois$geometry[1],
-          by_element = TRUE
-          ) %>%
-          base::round()
+      # distance_from_home = 
+      #   sf::st_distance(
+      #     geometry, 
+      #     my_pois$geometry[1],
+      #     by_element = TRUE
+      #     ) %>%
+      #     base::round()
     ) %>%
     dplyr::select(
       type, 
@@ -130,7 +130,7 @@ read_pq_data <- function(pq_gpx_file) {
       year, 
       month, 
       day,
-      distance_from_home
+      #distance_from_home
     )
   }
 ```
@@ -352,54 +352,55 @@ trondheim %>%
   )
 ```
 
-
+<!--
 ## DT i Trondheim
+-->
 
 ```{r dt}
-trondheim_dt <-
-  trondheim |> 
-  dplyr::left_join(
-    trd,
-    by = c("gc_code")
-  ) |> 
-  dplyr::mutate(
-    difficulty = as.factor(difficulty),
-    terrain = as.factor(terrain)
-  )
+# trondheim_dt <-
+#   trondheim |> 
+#   dplyr::left_join(
+#     trd,
+#     by = c("gc_code")
+#   ) |> 
+#   dplyr::mutate(
+#     difficulty = as.factor(difficulty),
+#     terrain = as.factor(terrain)
+#   )
 ```
 
 ```{r d}
-trondheim_dt |> 
-  ggplot(
-    aes(difficulty)
-  ) +
-  geom_bar()
+# trondheim_dt |> 
+#   ggplot(
+#     aes(difficulty)
+#   ) +
+#   geom_bar()
 ```
 
 ```{r t}
-trondheim_dt |> 
-  ggplot(
-    aes(terrain)
-  ) +
-  geom_bar()
+# trondheim_dt |> 
+#   ggplot(
+#     aes(terrain)
+#   ) +
+#   geom_bar()
 ```
 
 ```{r graph}
 # Finding all possible combinations of difficulty
-dt <- 
-  trondheim_dt |> 
-  dplyr::select(
-    gc_code,
-    title,
-    difficulty,
-    distance_from_home
-  ) |> 
-  dplyr::group_by(
-    difficulty
-  ) |> 
-  dplyr::slice_min(
-    order_by = distance_from_home,
-    n = 2
-  )
+# dt <- 
+#   trondheim_dt |> 
+#   dplyr::select(
+#     gc_code,
+#     title,
+#     difficulty,
+#     distance_from_home
+#   ) |> 
+#   dplyr::group_by(
+#     difficulty
+#   ) |> 
+#   dplyr::slice_min(
+#     order_by = distance_from_home,
+#     n = 2
+#   )
 ```
 

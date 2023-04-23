@@ -383,3 +383,60 @@ map <-
   leaflet::leaflet() |> 
   leaflet::addTiles() |> 
   leaflet::addMarkers()
+
+
+# GC428TT 0xh2bin OK67 #73 ----
+
+# Gjør om hex til bin og ser tallmønster.
+
+to_binary <- function(n){
+  
+  paste0(
+    as.integer(
+      base::rev(
+        base::intToBits(n)[1:8]
+      )
+    ), 
+    collapse = ""
+  )
+}
+
+hex <-
+  readr::read_csv2(
+    "0xh2bin.csv",
+    col_names = FALSE,
+    col_types = c(rep("c", 22))
+  ) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    dplyr::across(
+      tidyselect::everything(),
+      ~ as.character(.x) |> 
+        #base::as.hexmode(.x) |> 
+        base::strtoi(base = 16L) |> 
+        to_binary()
+    )
+  ) #|> 
+  # dplyr::mutate(
+  #   dplyr::across(
+  #     tidyselect::everything(),
+  #     ~ base::strtoi(.x, base = 16L)
+  #   )
+  # ) |> 
+  # dplyr::rowwise() |> 
+  # dplyr::mutate(
+  #   dplyr::across(
+  #     tidyselect::everything(),
+  #     ~ to_binary(.x)
+  #   )
+  # )
+
+# N63*23.633 E010*14.088
+#         ??            - disse er litt rare
+
+# r4c18 vises feil fordi F ikke leses inn! - skal være 4 på tall 18
+
+base::strtoi("1f", base = 16L) |> 
+  to_binary()
+
+
