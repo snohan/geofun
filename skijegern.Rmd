@@ -7,7 +7,7 @@ output: html_notebook
 base::Sys.setlocale(locale = "nb.utf8")
 library(tidyverse)
 library(sf)
-#library(googlesheets4)
+library(googlesheets4)
 #library(googledrive)
 #library(rgdal)
 library(leaflet)
@@ -66,34 +66,53 @@ kartverket_crs <- leafletCRS(
 #turo <- googledrive::drive_get("Turorientering")
 #poster <- googlesheets4::read_sheet(turo, sheet = "poster") 
 
-# poster <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1d6CEo0omjhowD-Dp2AQ_HsuaF6IA-QmKmmBCjUAcum0/edit#gid=0")
+# library(tesseract)
+# library(magick)
+# 
+# photo <- magick::image_read("skijegern2024del2.jpg")
+# 
+# test <- 
+#   photo |> 
+#   magick::image_resize("2000x") |> 
+#   magick::image_trim(10) |> 
+#   #magick::image_write(format = 'png', density = '300x300') |> 
+#   tesseract::ocr()
+# 
+# cat(test)
+
+poster <- 
+  googlesheets4::read_sheet(
+    "https://docs.google.com/spreadsheets/d/1d6CEo0omjhowD-Dp2AQ_HsuaF6IA-QmKmmBCjUAcum0/edit#gid=0",
+    sheet = "poster"
+  )
 
 # TODO: understand æøå!
 # Need devtools::install_github("r-lib/gargle"), but have no rights...
 # Await new release of gargle on CRAN
 
-skijegerposter <- 
-  readr::read_csv2(
-    "skijegern.csv",
-    show_col_types = FALSE
-  ) |> 
-  dplyr::filter(!is.na(lat))
-
 # skijegerposter <- 
-#   poster %>% 
-#   dplyr::filter(Opplegg == "Skijegern") %>% 
+#   readr::read_csv2(
+#     "skijegern.csv",
+#     show_col_types = FALSE
+#   ) |> 
 #   dplyr::filter(!is.na(lat))
+
+skijegerposter <-
+  poster |> 
+  dplyr::filter(Opplegg == "Skijegern")
 ```
 
 ```{r gpx_file, include=FALSE}
 poster_til_gpx <- 
-  skijegerposter %>% 
-  #dplyr::filter(Ar == 2022) %>% 
+  skijegerposter |> 
+  dplyr::filter(Ar == 2024) |> 
+  #dplyr::slice(1:6) |> 
   dplyr::mutate(
-    name = as.character(Postnr),
-    #lat = as.numeric(lat),
-    #lon = as.numeric(lon)
-  ) %>% 
+    number = as.numeric(unlist(Postnr)),
+    name = paste0("S24_", base::sprintf("%02d", number)),
+    lat = as.numeric(unlist(lat)),
+    lon = as.numeric(unlist(lon))
+  ) |> 
   dplyr::select(
     name, 
     desc = Beskrivelse, 
@@ -107,10 +126,11 @@ poster_til_gpx <-
 
 poster_til_gpx |> 
   sf::st_write(
-    dsn = "skijeger_2023.gpx"
+    dsn = "skijeger_2024_.gpx",
+    append = FALSE
   )
 
-# data_til_gpx <- 
+  # data_til_gpx <- 
 #   sp::SpatialPointsDataFrame(
 #     coords = poster_til_gpx[,c(4, 3)],
 #     data = poster_til_gpx,

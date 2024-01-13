@@ -1,4 +1,5 @@
 library(tidyverse)
+base::Sys.setlocale(locale = "nb.utf8")
 
 # Tistoner ----
 ciphertext <-
@@ -91,5 +92,30 @@ tistoner_cipher_solution <-
   solve_tistoner_cipher()
 
 
+# don't even bother ----
+# Lab cache with sorting of letters
 
+text <- "forbudt for motorvogn gjelder ikke trondheim bydrift og kjøring til eiendommene"
 
+string_length <-
+  stringr::str_remove_all(text, " ") |> 
+  stringr::str_length()
+
+string_sorted <-
+  text |> 
+  stringr::str_remove_all(" ") |> 
+  stringr::str_split("") |> 
+  purrr::map(~ stringr::str_sort(.))
+
+letters <-
+  tibble::tibble(
+    letters = string_sorted[[1]]
+  ) |> 
+  dplyr::group_by(letters) |> 
+  dplyr::summarise(n = n()) |> 
+  dplyr::mutate(
+    n_1 = n - 1
+  ) |> 
+  dplyr::filter(
+    n_1 > 0
+  )
